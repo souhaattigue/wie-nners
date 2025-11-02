@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌾 مبروكة - مساعد الفلاحة الذكي</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Tahoma", "Segoe UI", sans-serif;
+      background-color: #eaf8ec;
+      color: #333;
+      direction: rtl;
+    }
+    header {
+      background-color: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+    #dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 20px;
+    }
+    .card {
+      border-radius: 12px;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .temp { background-color: #f57c00; }
+    .rain { background-color: #1976d2; }
+    .soil { background-color: #388e3c; }
+    .wind { background-color: #455a64; }
+    .forecast { background-color: #6a1b9a; }
+
+    .card i {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    #assistant-box {
+      margin: 25px auto;
+      background-color: #ffffff;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 600px;
+      padding: 20px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      line-height: 1.7em;
+    }
+
+    #assistant-box h3 {
+      color: #2e7d32;
+      font-size: 1.4em;
+    }
+
+    #assistant-box p {
+      font-size: 1.1em;
+    }
+
+    footer {
+      background-color: #c8e6c9;
+      text-align: center;
+      padding: 15px;
+      font-size: 1em;
+      color: #2e7d32;
+    }
+  </style>
+</head>
+<body>
+
+<header>🤖 مبروكة - مساعد الفلاحة الذكي</header>
+
+<section id="dashboard">
+  <div class="card temp" data-type="temp" data-value="24">
+    <i class="fas fa-temperature-high"></i>
+    <h3>الحرارة</h3>
+    <p>٢٤°</p>
+  </div>
+
+  <div class="card rain" data-type="rain" data-value="0">
+    <i class="fas fa-cloud-rain"></i>
+    <h3>المطر</h3>
+    <p>لا يوجد</p>
+  </div>
+
+  <div class="card soil" data-type="soil" data-value="62">
+    <i class="fas fa-water"></i>
+    <h3>رطوبة الأرض</h3>
+    <p>٪٦٢</p>
+  </div>
+
+  <div class="card wind" data-type="wind" data-value="10">
+    <i class="fas fa-wind"></i>
+    <h3>الرياح</h3>
+    <p>١٠ كم/س</p>
+  </div>
+
+  <div class="card forecast" data-type="forecast" data-value="جزئيا غائم">
+    <i class="fas fa-cloud-sun"></i>
+    <h3>الجوّ اليوم</h3>
+    <p>جزئيا غائم</p>
+  </div>
+</section>
+
+<div id="assistant-box">
+  <h3>👩‍🌾 مبروكة في خدمتك</h3>
+  <p>إضغط على بطاقة باش نعطيك حالة المتغيّر وننصحك تسقي ولا لا 🌿</p>
+</div>
+
+<footer>🧠 مبروكة تساعدك باش تاخذ القرار الصحيح في السقي 🌾</footer>
+
+<script>
+  let arabicVoice = null;
+
+  // Charger les voix
+  function loadVoices() {
+    const voices = speechSynthesis.getVoices();
+    arabicVoice = voices.find(v => v.lang.startsWith('ar')) || voices.find(v => v.lang.startsWith('en'));
+  }
+
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+
+  function speak(text) {
+    if (!('speechSynthesis' in window)) return alert("المتصفح ما يدعمش الصوت 😕");
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'ar-SA';
+    msg.rate = 0.9;
+    msg.pitch = 1;
+    if (arabicVoice) msg.voice = arabicVoice;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(msg);
+  }
+
+  // ⚙️ Fonction d'intelligence simple
+  function getAssistantAdvice(type, value) {
+    let text = "";
+    let decision = "";
+
+    switch (type) {
+      case "temp":
+        if (value > 30) {
+          text = "الحرارة طالعة برشا، خمم تسقي بكري في الصباح خير 🌞";
+          decision = "👩‍🌾 مبروكة تنصحك تسقي شوي.";
+        } else if (value < 15) {
+          text = "الجو بارد، النبات ما يحتاجش برشا ماء 🥶";
+          decision = "🚫 ما تسقيش اليوم.";
+        } else {
+          text = "الحرارة متوسطة ومناسبة للنبات 🌤️";
+          decision = "✅ السقي مش ضروري توا.";
+        }
+        break;
+
+      case "rain":
+        if (value == 0) {
+          text = "ما فماش مطر، الأرض تنشف شوية 💧";
+          decision = "🔹 تسقي خفيف خير.";
+        } else {
+          text = "تمطر توا، خليه المطر يخدم 😄";
+          decision = "🚫 ما تسقيش.";
+        }
+        break;
+
+      case "soil":
+        if (value > 70) {
+          text = "الأرض فيها رطوبة كافية 🌱";
+          decision = "🚫 ما تسقيش اليوم.";
+        } else if (value < 40) {
+          text = "الأرض ناشفة شوية 💦";
+          decision = "💧 تسقي خفيف.";
+        } else {
+          text = "الرطوبة متوازنة، الوضع باهي 👍";
+          decision = "✅ ما تسقيش.";
+        }
+        break;
+
+      case "wind":
+        if (value > 20) {
+          text = "الرياح قوية، ما تسقيش باش ما يتبخرش الماء 🌬️";
+          decision = "🚫 ما تسقيش.";
+        } else {
+          text = "الرياح خفيفة، ما فيهاش خطر.";
+          decision = "✅ تنجم تسقي.";
+        }
+        break;
+
+      case "forecast":
+        text = "الجو اليوم جزئيا غايم ☁️، درجة حرارة معتدلة.";
+        decision = "✅ ما فماش خطر.";
+        break;
+
+      default:
+        text = "ما عنديش معطى واضح 😅";
+        decision = "";
+    }
+
+    return `${text} ${decision}`;
+  }
+
+  // 🎯 Interaction
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      const type = card.dataset.type;
+      const value = parseFloat(card.dataset.value) || card.dataset.value;
+      const advice = getAssistantAdvice(type, value);
+
+      document.getElementById('assistant-box').innerHTML = `
+        <h3>🤖 نصيحة مبروكة</h3>
+        <p>${advice}</p>
+      `;
+
+      speak(advice);
+      card.style.transform = 'scale(1.05)';
+      setTimeout(() => card.style.transform = '', 400);
+    });
+  });
+
+  setTimeout(loadVoices, 1000);
+</script>
+
+</body>
+</html>
